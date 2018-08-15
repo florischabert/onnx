@@ -421,4 +421,54 @@ ONNX_OPERATOR_SET_SCHEMA(
             "T",
             {"tensor(float16)", "tensor(float)", "tensor(double)"},
             "Constrain input and output types to float tensors."));
+
+static const char* BoxExtract_ver9_doc =
+    R"DOC(Filter scores and generate their corresponding boxes using 
+anchors and predicted deltas.)DOC";
+
+ONNX_OPERATOR_SET_SCHEMA(
+    BoxExtract,
+    9,
+    OpSchema()
+        .SetSupportLevel(SupportType::EXPERIMENTAL)
+        .SetDoc(BoxExtract_ver9_doc)
+        .Attr(
+            "score_thresh", 
+            "Score threshold", 
+            AttributeProto::FLOAT, 
+            OPTIONAL)
+        .Attr(
+            "top_n", 
+            "Number of top scores to keep", 
+            AttributeProto::INT, 
+            OPTIONAL)
+        .Input(0, 
+            "scores", 
+            "Scores, size (batch, num_anchors, num_classes, H, W)", 
+            "T")
+        .Input(1, 
+            "boxes", 
+            "Boxes or deltas (if anchors are provided), size (batch, num_anchors, 4, H, W), format (dx, dy, dw, dh", 
+            "T")
+        .Input(3, 
+            "im_info", 
+            "Image info, size (batch, 3), format (h, w, scale)", 
+            "T")
+        .Input(2, 
+            "anchors", 
+            "Optional box anchors, size (num_anchors, 4), format (x, y, w, h", 
+            "T", 
+            OpSchema::Optional)
+        .Output(0, 
+            "scores_out", 
+            "Filtered scores, size (batch, N, num_classes)", 
+            "T")
+        .Output(1, 
+            "boxes_out", 
+            "Corresponding boxes, size (batch, N, num_classes * 4), format (x, y, h, w)", 
+            "T")
+        .TypeConstraint(
+            "T",
+            {"tensor(float16)", "tensor(float)", "tensor(double)"},
+            "Constrain input and output types to float tensors."));
 } // namespace ONNX_NAMESPACE
