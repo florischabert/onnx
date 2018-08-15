@@ -421,4 +421,95 @@ ONNX_OPERATOR_SET_SCHEMA(
             "T",
             {"tensor(float16)", "tensor(float)", "tensor(double)"},
             "Constrain input and output types to float tensors."));
+
+static const char* BoxExtract_ver9_doc =
+    R"DOC(Filter scores and generate their corresponding boxes using 
+anchors and predicted deltas.)DOC";
+
+ONNX_OPERATOR_SET_SCHEMA(
+    BoxExtract,
+    9,
+    OpSchema()
+        .SetSupportLevel(SupportType::EXPERIMENTAL)
+        .SetDoc(BoxExtract_ver9_doc)
+        .Attr(
+            "score_thresh", 
+            "Score threshold", 
+            AttributeProto::FLOAT, 
+            OPTIONAL)
+        .Attr(
+            "top_n", 
+            "Number of top scores to keep", 
+            AttributeProto::INT, 
+            OPTIONAL)
+        .Attr(
+            "anchors", 
+            "List of anchors\' coordinates", 
+            AttributeProto::FLOATS, 
+            OPTIONAL)
+        .Input(0, 
+            "scores", 
+            "Scores, size (batch, num_anchors, num_classes, H, W)", 
+            "T")
+        .Input(1, 
+            "boxes", 
+            "Boxes or deltas (if anchors are provided), size (batch, num_anchors, 4, H, W), format (dx, dy, dw, dh)", 
+            "T")
+        .Input(2, 
+            "im_info", 
+            "Image info, size (batch, 3), format (h, w, scale)", 
+            "T")
+        .Output(0, 
+            "detections", 
+            "Filtered detections, size (n, 7), format (batch, score, class, x, y, w, h)", 
+            "T")
+        .TypeConstraint(
+            "T",
+            {"tensor(float16)", "tensor(float)", "tensor(double)"},
+            "Constrain input and output types to float tensors."));
+
+static const char* BoxMergeWithNMS_ver9_doc =
+    R"DOC(Perform non maximum suppression on boxes from multiple inbput detection vectors.)DOC";
+
+ONNX_OPERATOR_SET_SCHEMA(
+    BoxMergeWithNMS,
+    9,
+    OpSchema()
+        .SetSupportLevel(SupportType::EXPERIMENTAL)
+        .SetDoc(BoxMergeWithNMS_ver9_doc)
+        .Attr(
+            "nms", 
+            "Non maximum suppression IoU", 
+            AttributeProto::FLOAT, 
+            OPTIONAL)
+        .Attr(
+            "detections_per_im", 
+            "Number of detectioms per image keep", 
+            AttributeProto::INT, 
+            OPTIONAL)
+        .Input(0, 
+            "detections_0", 
+            "First of the detection vectors, size (n, 7), format (batch, score, class, x, y, w, h)", 
+            "T")
+        .Output(0, 
+            "scores", 
+            "Filtered scores, size (n)", 
+            "T")
+        .Output(1, 
+            "boxes", 
+            "Filtered boxes, size (n, 4)", 
+            "T")
+        .Output(2, 
+            "classes", 
+            "Class id for each filtered score/box, size (n)", 
+            "T")
+        .Output(3, 
+            "batch_splits", 
+            "Output batch splits for scores/boxes/classes after applying NMS", 
+            "T")
+        .TypeConstraint(
+            "T",
+            {"tensor(float16)", "tensor(float)", "tensor(double)"},
+            "Constrain input and output types to float tensors."));
+
 } // namespace ONNX_NAMESPACE
