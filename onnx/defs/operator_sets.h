@@ -470,20 +470,6 @@ class OpSet_Onnx_ver8 {
   }
 };
 
-// Forward declarations for ai.onnx version 9
-class ONNX_OPERATOR_SET_SCHEMA_CLASS_NAME(Onnx, 9, BoxExtract);
-class ONNX_OPERATOR_SET_SCHEMA_CLASS_NAME(Onnx, 9, BoxMergeWithNMS);
-
-// Iterate over schema from ai.onnx version 8
-class OpSet_Onnx_ver9 {
- public:
-  static void ForEachSchema(std::function<void(OpSchema&&)> fn) {
-    fn(GetOpSchema<ONNX_OPERATOR_SET_SCHEMA_CLASS_NAME(Onnx, 9, BoxExtract)>());
-    fn(GetOpSchema<ONNX_OPERATOR_SET_SCHEMA_CLASS_NAME(Onnx, 9, BoxMergeWithNMS)>());
-  }
-};
-
-
 inline void RegisterOnnxOperatorSetSchema() {
   RegisterOpSetSchema<OpSet_Onnx_ver1>();
   RegisterOpSetSchema<OpSet_Onnx_ver2>();
@@ -493,7 +479,6 @@ inline void RegisterOnnxOperatorSetSchema() {
   RegisterOpSetSchema<OpSet_Onnx_ver6>();
   RegisterOpSetSchema<OpSet_Onnx_ver7>();
   RegisterOpSetSchema<OpSet_Onnx_ver8>();
-  RegisterOpSetSchema<OpSet_Onnx_ver9>();
 }
 
 } // namespace ONNX_NAMESPACE

@@ -620,11 +620,9 @@ void OpSchema::Finalize() {
 
   // all inputs and outputs have names
   for (const auto& it : inputs_) {
-    std::cout << it.GetName() << it.GetDescription() << std::endl;
     ENFORCE(!(it.GetName().empty()));
   }
   for (const auto& it : outputs_) {
-    std::cout << it.GetName() << it.GetDescription() << std::endl;
     ENFORCE(!(it.GetName().empty()));
   }
 
