@@ -458,6 +458,11 @@ ONNX_OPERATOR_SET_SCHEMA(
             "List of anchors\' coordinates", 
             AttributeProto::FLOATS, 
             OPTIONAL)
+        .Attr(
+            "anchors_counts", 
+            "Number of anchors per boxes tensor", 
+            AttributeProto::FLOATS, 
+            OPTIONAL)
         .Input(0, 
             "im_info", 
             "Image info, size (batch, 3), format (h, w, scale)", 
