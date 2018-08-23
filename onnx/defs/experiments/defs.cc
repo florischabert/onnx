@@ -461,7 +461,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .Attr(
             "anchors_counts", 
             "Number of anchors per boxes tensor", 
-            AttributeProto::FLOATS, 
+            AttributeProto::INTS, 
             OPTIONAL)
         .Input(0, 
             "im_info", 
