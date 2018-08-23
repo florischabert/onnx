@@ -422,24 +422,35 @@ ONNX_OPERATOR_SET_SCHEMA(
             {"tensor(float16)", "tensor(float)", "tensor(double)"},
             "Constrain input and output types to float tensors."));
 
-static const char* BoxExtract_ver8_doc =
-    R"DOC(Filter scores and generate their corresponding boxes using 
-anchors and predicted deltas.)DOC";
+static const char* BoxDecode_ver8_doc =
+    R"DOC(Decode scores and bounding boxes from feature tensors using 
+anchors and predicted deltas. Filter scores and apply non maximum suppression 
+to final boxes. Can merge multiple alternated scores and box predictions tensors.)DOC";
 
 ONNX_OPERATOR_SET_SCHEMA(
-    BoxExtract,
+    BoxDecode,
     8,
     OpSchema()
         .SetSupportLevel(SupportType::EXPERIMENTAL)
-        .SetDoc(BoxExtract_ver8_doc)
+        .SetDoc(BoxDecode_ver8_doc)
         .Attr(
             "score_thresh", 
             "Score threshold", 
             AttributeProto::FLOAT, 
             OPTIONAL)
         .Attr(
-            "top_n", 
+            "pre_nms_top_n", 
             "Number of top scores to keep", 
+            AttributeProto::INT, 
+            OPTIONAL)
+        .Attr(
+            "nms_thresh", 
+            "Non maximum suppression IoU threshold", 
+            AttributeProto::FLOAT, 
+            OPTIONAL)
+        .Attr(
+            "detections_per_im", 
+            "Number of detectioms per image keep", 
             AttributeProto::INT, 
             OPTIONAL)
         .Attr(
@@ -448,48 +459,16 @@ ONNX_OPERATOR_SET_SCHEMA(
             AttributeProto::FLOATS, 
             OPTIONAL)
         .Input(0, 
-            "scores", 
-            "Scores, size (batch, num_anchors, num_classes, H, W)", 
-            "T")
-        .Input(1, 
-            "boxes", 
-            "Boxes or deltas (if anchors are provided), size (batch, num_anchors, 4, H, W), format (dx, dy, dw, dh)", 
-            "T")
-        .Input(2, 
             "im_info", 
             "Image info, size (batch, 3), format (h, w, scale)", 
             "T")
-        .Output(0, 
-            "detections", 
-            "Filtered detections, size (n, 7), format (batch, score, class, x, y, w, h)", 
+        .Input(1, 
+            "scores", 
+            "First scores tensor, size (batch, num_anchors, num_classes, H, W)", 
             "T")
-        .TypeConstraint(
-            "T",
-            {"tensor(float16)", "tensor(float)", "tensor(double)"},
-            "Constrain input and output types to float tensors."));
-
-static const char* BoxMergeWithNMS_ver8_doc =
-    R"DOC(Perform non maximum suppression on boxes from multiple inbput detection vectors.)DOC";
-
-ONNX_OPERATOR_SET_SCHEMA(
-    BoxMergeWithNMS,
-    8,
-    OpSchema()
-        .SetSupportLevel(SupportType::EXPERIMENTAL)
-        .SetDoc(BoxMergeWithNMS_ver8_doc)
-        .Attr(
-            "nms", 
-            "Non maximum suppression IoU", 
-            AttributeProto::FLOAT, 
-            OPTIONAL)
-        .Attr(
-            "detections_per_im", 
-            "Number of detectioms per image keep", 
-            AttributeProto::INT, 
-            OPTIONAL)
-        .Input(0, 
-            "detections_0", 
-            "First of the detection vectors, size (n, 7), format (batch, score, class, x, y, w, h)", 
+        .Input(2, 
+            "boxes", 
+            "First boxes or deltas tensor (if anchors are provided), size (batch, num_anchors, 4, H, W), format (dx, dy, dw, dh)", 
             "T",
             OpSchema::Variadic)
         .Output(0, 
