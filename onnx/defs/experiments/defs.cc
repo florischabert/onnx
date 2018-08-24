@@ -423,9 +423,8 @@ ONNX_OPERATOR_SET_SCHEMA(
             "Constrain input and output types to float tensors."));
 
 static const char* BoxDecode_ver8_doc =
-    R"DOC(Decode scores and bounding boxes from feature tensors using 
-anchors and predicted deltas. Filter scores and apply non maximum suppression 
-to final boxes. Can merge multiple alternated scores and box predictions tensors.)DOC";
+    R"DOC(Decode and filter scores, classes and bounding boxes from feature tensors using 
+anchors and predicted deltas.)DOC";
 
 ONNX_OPERATOR_SET_SCHEMA(
     BoxDecode,
@@ -436,61 +435,86 @@ ONNX_OPERATOR_SET_SCHEMA(
         .Attr(
             "score_thresh", 
             "Score threshold", 
-            AttributeProto::FLOAT, 
-            OPTIONAL)
+            AttributeProto::FLOAT)
         .Attr(
-            "pre_nms_top_n", 
+            "top_n", 
             "Number of top scores to keep", 
-            AttributeProto::INT, 
-            OPTIONAL)
-        .Attr(
-            "nms_thresh", 
-            "Non maximum suppression IoU threshold", 
-            AttributeProto::FLOAT, 
-            OPTIONAL)
-        .Attr(
-            "detections_per_im", 
-            "Number of detectioms per image keep", 
-            AttributeProto::INT, 
-            OPTIONAL)
+            AttributeProto::INT)
         .Attr(
             "anchors", 
             "List of anchors\' coordinates", 
             AttributeProto::FLOATS, 
             OPTIONAL)
         .Attr(
-            "anchors_counts", 
-            "Number of anchors per boxes tensor", 
-            AttributeProto::INTS, 
+            "scale", 
+            "Anchor grid scale", 
+            AttributeProto::FLOAT, 
             OPTIONAL)
         .Input(0, 
-            "im_info", 
-            "Image info, size (batch, 3), format (h, w, scale)", 
+            "scores", 
+            "Scores, size (batch, num_anchors * num_classes, H, W)", 
             "T")
         .Input(1, 
-            "scores", 
-            "First scores tensor, size (batch, num_anchors, num_classes, H, W)", 
-            "T")
-        .Input(2, 
             "boxes", 
-            "First boxes or deltas tensor (if anchors are provided), size (batch, num_anchors, 4, H, W), format (dx, dy, dw, dh)", 
-            "T",
-            OpSchema::Variadic)
+            "Boxes or deltas (if anchors are present), size (batch, num_anchors * 4, H, W), format (dx, dy, dw, dh)", 
+            "T")
         .Output(0, 
-            "scores", 
-            "Filtered scores, size (n)", 
+            "decoded_scores", 
+            "Decoded scores, size (batch, n)", 
             "T")
         .Output(1, 
-            "boxes", 
-            "Filtered boxes, size (n, 4)", 
+            "decoded_boxes", 
+            "Decoded boxes, size (batch, n, 4)", 
             "T")
         .Output(2, 
-            "classes", 
-            "Class id for each filtered score/box, size (n)", 
+            "decoded_classes", 
+            "Decoded class for each score/box, size (batch, n)", 
             "T")
-        .Output(3, 
-            "batch_splits", 
-            "Output batch splits for scores/boxes/classes after applying NMS", 
+        .TypeConstraint(
+            "T",
+            {"tensor(float16)", "tensor(float)", "tensor(double)"},
+            "Constrain input and output types to float tensors."));
+
+static const char* BoxNMS_ver8_doc =
+    R"DOC(Perform non maximum suppression on decoded boxes.)DOC";
+
+ONNX_OPERATOR_SET_SCHEMA(
+    BoxNMX,
+    8,
+    OpSchema()
+        .SetSupportLevel(SupportType::EXPERIMENTAL)
+        .SetDoc(BoxNMS_ver8_doc)
+        .Attr(
+            "nms_thresh",
+            "Non maximum suppression IoU threshold", 
+            AttributeProto::FLOAT)
+        .Attr(
+            "detections_per_im",
+            "Number of detectioms per image keep", 
+            AttributeProto::INT)
+        .Input(0, 
+            "scores", 
+            "Scores, size (batch, n)",
+            "T")
+        .Input(1, 
+            "boxes", 
+            "Boxes, size (batch, n, 4)", 
+            "T")
+        .Input(2, 
+            "classes", 
+            "Class for each score/box, size (batch, n)", 
+            "T")
+        .Output(0, 
+            "scores_nms", 
+            "Final scores, size (batch, n)", 
+            "T")
+        .Output(1, 
+            "boxes_nms", 
+            "Final boxes, size (batch, n, 4)", 
+            "T")
+        .Output(2, 
+            "classes_nms", 
+            "Final class for each score/box, size (batch, n)", 
             "T")
         .TypeConstraint(
             "T",
