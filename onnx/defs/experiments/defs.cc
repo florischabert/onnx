@@ -442,7 +442,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             AttributeProto::INT)
         .Attr(
             "anchors", 
-            "List of anchors\' coordinates", 
+            "List of anchors coordinates", 
             AttributeProto::FLOATS, 
             OPTIONAL)
         .Attr(
