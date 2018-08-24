@@ -479,7 +479,7 @@ static const char* BoxNMS_ver8_doc =
     R"DOC(Perform non maximum suppression on decoded boxes.)DOC";
 
 ONNX_OPERATOR_SET_SCHEMA(
-    BoxNMX,
+    BoxNMS,
     8,
     OpSchema()
         .SetSupportLevel(SupportType::EXPERIMENTAL)
